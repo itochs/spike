@@ -162,3 +162,5 @@ cython_debug/
 *Zone.Identifier
 
 **/models/*
+**/*.jpg
+**/*.save

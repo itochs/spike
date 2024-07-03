@@ -97,15 +97,22 @@ def separate_steer(mode, steer):
         return steer_cat
 
 
-def create_folder():
+def create_folder(overwrite=False, top_dir="."):
     # create folder for save image
-    if not os.path.exists('image_data'):
-        os.mkdir('image_data')
-        os.mkdir('image_data/images')
-    if os.path.exists('image_data/images'):
-        shutil.rmtree('image_data/images')
-        os.mkdir('image_data/images')
+    image_dir = f'{top_dir}/image_data'
+    if not os.path.exists(image_dir):
+        os.mkdir(image_dir)
+        os.mkdir(f'{image_dir}/images')
+    if overwrite:
+        shutil.rmtree(image_dir)
+        os.mkdir(image_dir)
+        os.mkdir(f'{image_dir}/images')
 
+def create_log_dir(overwrite=False, top_dir="."):
+    create_folder(overwrite, top_dir)
+    if overwrite:
+        with open(f"{top_dir}/image_data/list.txt", "w"):
+            pass
 
 def main():
 
@@ -123,15 +130,18 @@ def main():
     print(ser)
 
     # define mode depend on key-type
-    mode = Mode()
+    _mode = Mode()
     key = Key()
-    log_flag, cnt = mode.get_mode_log()
-    mode = mode.get_mode_control()
+    log_flag, cnt = _mode.get_mode_log()
+    mode = _mode.get_mode_control()
 
     # make image and list save folder
-    create_folder()
     top_dir = './image_data/'
     txt_file = top_dir + 'list.txt'
+    if _mode._log_type_mode == '0':
+        create_log_dir(overwrite=True)
+    else:
+        create_log_dir(overwrite=False)
 
     # define input type ofkey_control mode
     non_blocking = True
@@ -187,8 +197,8 @@ def main():
                 cnt_str = f"{cnt:08}"
                 img_name = cnt_str + '_' +  dt.now().strftime('%s') + '.jpg'
                 img_path = top_dir + './images/' + img_name
-                #cv2.imwrite(img_path, reshaped_img)
-                cv2.imwrite(img_path, wh_hsv)
+                cv2.imwrite(img_path, reshaped_img)
+                #cv2.imwrite(img_path, wh_hsv)
                 #cv2.imwrite(img_path, target)
                 with open(txt_file, mode='a') as f:
                     f.write('{} {} {}\n'.format(img_name, int(steer), int(throttle)))
